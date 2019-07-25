@@ -1,12 +1,6 @@
 <template>
-  <div class="home">
+  <div class="CargoPackage">
     <a-button class="editable-add-btn" @click="showModal">Add</a-button>
-    <collection-create-form
-      ref="collectionForm"
-      :visible="visible"
-      @cancel="handleCancel"
-      @create="handleCreate"
-    />
     <a-modal
       :visible="visible"
       title="包裹入库"
@@ -45,25 +39,12 @@
             ]"
           />
         </a-form-item>
-        
-        <!-- <a-form-item label="状态">
-          <a-input
-            v-decorator="[
-              '状态',
-              {
-                rules: [{ required: true, message: '请输入运单状态!' }],
-              }
-            ]"
-          />
-        </a-form-item>
-        <a-form-item label="预约时间">
-          <a-input v-decorator="['预约时间']" />
-        </a-form-item>-->
       </a-form>
     </a-modal>
     <a-table bordered :dataSource="dataSource" :columns="columns">
       <template slot="operation" slot-scope="text, record">
         <a-popconfirm v-if="dataSource.length" title="确认收货?" @confirm="() => onReceive(record.key)">
+          <!-- <a-popconfirm v-if="dataSource.length" title="确认收货?" @confirm="() => onReceive(record.key)"> -->
           <a href="javascript:;">确认收货</a>
         </a-popconfirm>
       </template>
@@ -72,34 +53,29 @@
 </template>
 
 <script>
-const CollectionCreateForm = {
-  props: ["visible"],
-  beforeCreate() {
-    this.form = this.$form.createForm(this);
-  }
+import { constants } from "crypto";
+
+let id = 0;
+const getId = () => {
+  return id++;
 };
 export default {
-  name: "home",
-  components: { CollectionCreateForm },
+  name: "CargoPackage",
   data: function() {
     return {
       visible: false,
       dataSource: [
-        {
-          key: "0",
-          运单号: "123456",
-          收件人: "Edward King 0",
-          电话: "32",
-          状态: "London, Park Lane no. 0",
-          预约时间: 2019
-          // }, {
-          //   key: '1',
-          //   name: 'Edward King 1',
-          //   age: '32',
-          //   address: 'London, Park Lane no. 1',
-        }
+        // {
+        //   key: "0",
+        //   // key:"" + this.getId(),
+        //   运单号: "158",
+        //   收件人: "Louis",
+        //   电话: "520",
+        //   状态: "已取件",
+        //   预约时间: "2019"
+        // }
       ],
-      count: 1,
+      count: 0,
       columns: [
         {
           title: "运单号",
@@ -128,7 +104,8 @@ export default {
           dataIndex: "operation",
           scopedSlots: { customRender: "operation" }
         }
-      ]
+      ],
+      form: this.$form.createForm(this)
     };
   },
   methods: {
@@ -143,7 +120,7 @@ export default {
       this.visible = false;
     },
     handleCreate() {
-      const form = this.$refs.collectionForm.form;
+      const form = this.form;
       form.validateFields((err, values) => {
         if (err) {
           return;
@@ -151,19 +128,41 @@ export default {
         console.log("Received values of form: ", values);
         form.resetFields();
         this.visible = false;
+        const { count, dataSource } = this;
+        let newData = {
+          key: count,
+          运单号: values.运单号,
+          收件人: values.收件人,
+          电话: values.电话, 
+          预约时间: null,
+          状态: this.预约时间 == null ? "未取件" : "已预约",
+          // name: `Edward King ${count}`,
+          // age: 32,
+          // address: `London, Park Lane no. ${count}`,
+        };
+        // console.log("----",this.$store.state.packageList);
+        this.$store.commit('addPackage',newData);
+        // console.log("----",(this.$store.state.packageList)[0].运单号);
+        this.dataSource = [...dataSource, newData];
+        this.count = count + 1;
       });
     }
     // handleAdd () {
     //   const { count, dataSource } = this
     //   const newData = {
     //     key: count,
-    //     name: `Edward King ${count}`,
-    //     age: 32,
-    //     address: `London, Park Lane no. ${count}`,
+    //     运单号:111,
+    //     收件人:"222",
+    //     电话:555,
+    //     状态:"8888",
+    //     预约时间:"2121"
+    //     // name: `Edward King ${count}`,
+    //     // age: 32,
+    //     // address: `London, Park Lane no. ${count}`,
     //   }
     //   this.dataSource = [...dataSource, newData]
     //   this.count = count + 1
     // },
   }
-}
+};
 </script>
