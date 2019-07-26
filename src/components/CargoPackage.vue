@@ -1,5 +1,6 @@
 <template>
   <div class="CargoPackage">
+
     <a-button class="editable-add-btn" @click="showModal">Add</a-button>
     <a-modal
       :visible="visible"
@@ -41,6 +42,7 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
     <a-table bordered :dataSource="dataSource" :columns="columns">
       <template slot="operation" slot-scope="text, record">
         <a-popconfirm v-if="dataSource.length" title="确认收货?" @confirm="() => onReceive(record.key)">
@@ -49,7 +51,8 @@
         </a-popconfirm>
       </template>
     </a-table>
-  </div>
+    </div>
+  
 </template>
 
 <script>
@@ -108,11 +111,19 @@ export default {
       form: this.$form.createForm(this)
     };
   },
+  mounted(){
+    // console.log("123      ",this.dataSource);
+    this.dataSource = this.$store.getters.getAllPackage;
+  },
+
   methods: {
+    
     onReceive(key) {
       // const dataSource = [...this.dataSource]
       // this.dataSource = dataSource.filter(item => item.key !== key)
     },
+   
+ 
     showModal() {
       this.visible = true;
     },
@@ -125,7 +136,6 @@ export default {
         if (err) {
           return;
         }
-        console.log("Received values of form: ", values);
         form.resetFields();
         this.visible = false;
         const { count, dataSource } = this;
@@ -136,33 +146,15 @@ export default {
           电话: values.电话, 
           预约时间: null,
           状态: this.预约时间 == null ? "未取件" : "已预约",
-          // name: `Edward King ${count}`,
-          // age: 32,
-          // address: `London, Park Lane no. ${count}`,
         };
         // console.log("----",this.$store.state.packageList);
         this.$store.commit('addPackage',newData);
-        // console.log("----",(this.$store.state.packageList)[0].运单号);
-        this.dataSource = [...dataSource, newData];
+        // console.log(this.$store.getters.getAllPackage)
+        // this.dataSource = [...dataSource, newData];
         this.count = count + 1;
       });
     }
-    // handleAdd () {
-    //   const { count, dataSource } = this
-    //   const newData = {
-    //     key: count,
-    //     运单号:111,
-    //     收件人:"222",
-    //     电话:555,
-    //     状态:"8888",
-    //     预约时间:"2121"
-    //     // name: `Edward King ${count}`,
-    //     // age: 32,
-    //     // address: `London, Park Lane no. ${count}`,
-    //   }
-    //   this.dataSource = [...dataSource, newData]
-    //   this.count = count + 1
-    // },
-  }
+  },
+  
 };
 </script>
